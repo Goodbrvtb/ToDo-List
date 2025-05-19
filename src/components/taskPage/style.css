@@ -1,0 +1,16 @@
+.task-text {
+  background-color: rgba(250, 250, 250);
+  border-radius: 6px;
+  background: #ffffff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d9d9d9;
+  width: 100%;
+}
+.ant-btn {
+  color: #fff;
+  background: #3a9757;
+}
+.ant-btn-variant-solid:hover {
+  background: #3a9757;
+}
