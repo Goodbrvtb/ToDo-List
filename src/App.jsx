@@ -1,11 +1,7 @@
 import "./App.css";
 import TaskPage from "./components/taskPage";
 function App() {
-  return (
-    <>
-      <TaskPage />
-    </>
-  );
+  return <TaskPage />;
 }
 
 export default App;

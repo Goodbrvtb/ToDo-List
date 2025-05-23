@@ -32,7 +32,15 @@ function TaskPage() {
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
-      addTask();
+      if (task.trim() === "") {
+        showModal();
+
+        return;
+      }
+      const updatedTasks = [...storedTasks, { text: task, completed: false }];
+      localStorage.setItem("myData", JSON.stringify(updatedTasks));
+      setStoredTasks(updatedTasks);
+      setTask("");
     }
   };
 
@@ -82,6 +90,7 @@ function TaskPage() {
         <h1>Get things done!</h1>
         <Space.Compact style={{ width: "100%" }}>
           <Input
+            value={task}
             placeholder="What is the task today?"
             onChange={handleChange}
             onKeyDown={handleKeyDown}
