@@ -1,16 +1,26 @@
+import { Button } from "antd";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import "./App.css";
-import TaskPage from "./components/pages/taskPage";
+export function App() {
+  let location = useLocation();
+  const navigate = useNavigate();
 
-function App() {
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RegistrationPage />} />
-        <Route path="/task" element={<TaskPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <div>
+      {location.pathname == "/" && (
+        <div className="titel-home">
+          <h1>ToDo List </h1>
+          <Button onClick={() => handleNavigation("/login")}>Login</Button>
+          <Button onClick={() => handleNavigation("/registration")}>
+            Registration
+          </Button>
+        </div>
+      )}
+      <Outlet />
+    </div>
   );
 }
-
-export default App;

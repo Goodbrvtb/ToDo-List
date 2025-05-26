@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "@ant-design/icons": "5.x",
+    "@hookform/resolvers": "^5.0.1",
     "antd": "^5.25.1",
     "react": "18",
     "react-dom": "18",
-    "react-router-dom": "^7.6.1"
+    "react-hook-form": "^7.56.4",
+    "react-router": "^7.6.1",
+    "zod": "^3.25.28"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
