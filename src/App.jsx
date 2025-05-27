@@ -1,9 +1,17 @@
 import { Button } from "antd";
+import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import "./App.css";
+
 export function App() {
-  let location = useLocation();
   const navigate = useNavigate();
+  const myToken = localStorage.getItem("myToken");
+  useEffect(() => {
+    if (myToken) {
+      navigate("/task");
+    }
+  }, [myToken, navigate]);
+  let location = useLocation();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -12,7 +20,7 @@ export function App() {
   return (
     <div>
       {location.pathname == "/" && (
-        <div className="titel-home">
+        <div className="title-home">
           <h1>ToDo List </h1>
           <Button onClick={() => handleNavigation("/login")}>Login</Button>
           <Button onClick={() => handleNavigation("/registration")}>

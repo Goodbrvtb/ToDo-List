@@ -1,6 +1,7 @@
-import { Button, Input, Space, Modal } from "antd";
+import { DeleteFilled, EditFilled } from "@ant-design/icons";
+import { Button, Input, Modal, Space } from "antd";
 import { useEffect, useState } from "react";
-import { EditFilled, DeleteFilled } from "@ant-design/icons";
+import { useNavigate } from "react-router";
 import "./style.css";
 export function TaskPage() {
   const [task, setTask] = useState("");
@@ -8,6 +9,13 @@ export function TaskPage() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingText, setEditingText] = useState("");
   const [visible, setVisible] = useState(false);
+  const myToken = localStorage.getItem("myToken");
+  const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
   const showModal = () => {
     setVisible(true);
   };
@@ -20,68 +28,192 @@ export function TaskPage() {
     setVisible(false);
   };
   useEffect(() => {
-    const myData = localStorage.getItem("myData");
-    if (myData) {
-      setStoredTasks(JSON.parse(myData));
-    }
-  }, []);
+    const myDataTask = async () => {
+      if (myToken) {
+        const tasks = await getTasks(myToken);
+        setStoredTasks(tasks);
+        console.log(tasks);
+      } else {
+        console.log("Token is missing");
+      }
+    };
+    myDataTask();
+  }, [myToken]);
 
   const handleChange = (event) => {
     setTask(event.target.value);
   };
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = async (event) => {
     if (event.key === "Enter") {
       if (task.trim() === "") {
         showModal();
 
         return;
       }
-      const updatedTasks = [...storedTasks, { text: task, completed: false }];
-      localStorage.setItem("myData", JSON.stringify(updatedTasks));
-      setStoredTasks(updatedTasks);
+      console.log(task);
+      const todo = { title: task };
+      const createdTask = await createTask(todo, myToken);
+      setStoredTasks((prev) => [...prev, createdTask]);
       setTask("");
     }
   };
-
-  const addTask = () => {
+  useState("");
+  const addTask = async () => {
     if (task.trim() === "") {
       showModal();
 
       return;
     }
-    const updatedTasks = [...storedTasks, { text: task, completed: false }];
-    localStorage.setItem("myData", JSON.stringify(updatedTasks));
-    setStoredTasks(updatedTasks);
+    console.log(task);
+    const todo = { title: task };
+    const createdTask = await createTask(todo, myToken);
+    setStoredTasks((prev) => [...prev, createdTask]);
     setTask("");
   };
 
-  const toggleTaskCompletion = (index) => {
-    const updatedTasks = storedTasks.map((task, i) =>
-      i === index ? { ...task, completed: !task.completed } : task
+  const toggleTaskCompletion = async (item) => {
+    const updatedTasks = storedTasks.map((task) =>
+      task.id === item.id
+        ? { ...task, isCompleted: !task.isCompleted }
+        : { ...task, isCompleted: task.isCompleted }
     );
-    localStorage.setItem("myData", JSON.stringify(updatedTasks));
     setStoredTasks(updatedTasks);
+    try {
+      await patchTaskApi(item.id, myToken);
+      console.log(item);
+    } catch (error) {
+      console.log("Error updating task completion: ", error);
+      setStoredTasks(updatedTasks);
+    }
   };
-  const deleteTask = (index) => {
-    const updatedTasks = storedTasks.filter((_, i) => i !== index);
-    localStorage.setItem("myData", JSON.stringify(updatedTasks));
-    setStoredTasks(updatedTasks);
+  const deleteTask = async (item) => {
+    console.log(item, "delete");
+    try {
+      await deleteTaskApi(item.id, myToken);
+      const updatedTasks = storedTasks.filter((task) => task.id !== item.id);
+      setStoredTasks(updatedTasks);
+    } catch (error) {
+      console.log("Error deleting task: ", error);
+    }
   };
 
-  const editTask = (index) => {
-    setEditingIndex(index);
-    setEditingText(storedTasks[index].text);
+  const editTask = (item) => {
+    setEditingIndex(item.id);
+    setEditingText(item.title);
   };
 
-  const saveEdit = (index) => {
-    const updatedTasks = storedTasks.map((task, i) =>
-      i === index ? { ...task, text: editingText } : task
+  const saveEdit = async (item) => {
+    const updatedTasks = storedTasks.map((task) =>
+      task.id === item.id ? { ...task, title: editingText } : task
     );
-    localStorage.setItem("myData", JSON.stringify(updatedTasks));
+    await editTaskApi({ title: editingText }, item.id, myToken);
+    console.log({ title: editingText });
     setStoredTasks(updatedTasks);
     setEditingIndex(null);
     setEditingText("");
+  };
+
+  async function getTasks(token) {
+    try {
+      const response = await fetch(
+        `https://todo-redev.herokuapp.com/api/todos`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+      const data = await response.json();
+      console.log(data);
+
+      return data;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
+  async function createTask(todo, token) {
+    try {
+      const response = await fetch(
+        "https://todo-redev.herokuapp.com/api/todos",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(todo)
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+  async function deleteTaskApi(id, token) {
+    try {
+      const response = await fetch(
+        `https://todo-redev.herokuapp.com/api/todos/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+  async function patchTaskApi(id, token) {
+    try {
+      const response = await fetch(
+        `https://todo-redev.herokuapp.com/api/todos/${id}/isCompleted`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
+  async function editTaskApi(todo, id, token) {
+    try {
+      const response = await fetch(
+        `https://todo-redev.herokuapp.com/api/todos/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(todo)
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+  const logout = () => {
+    localStorage.removeItem("myToken");
+    handleNavigation("/login");
   };
 
   return (
@@ -101,17 +233,20 @@ export function TaskPage() {
         </Space.Compact>
         {storedTasks.length > 0 && (
           <ul>
-            {storedTasks.map((item, index) => (
-              <li key={index} style={{ display: "flex", alignItems: "center" }}>
-                {editingIndex === index ? (
+            {storedTasks.map((item) => (
+              <li
+                key={item.id}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                {editingIndex === item.id ? (
                   <>
                     <Input
                       value={editingText}
                       onChange={(e) => setEditingText(e.target.value)}
-                      onPressEnter={() => saveEdit(index)}
+                      onPressEnter={() => saveEdit(item)}
                       style={{ flex: 1 }}
                     />
-                    <Button type="primary" onClick={() => saveEdit(index)}>
+                    <Button type="primary" onClick={() => saveEdit(item)}>
                       Update
                     </Button>
                   </>
@@ -119,22 +254,22 @@ export function TaskPage() {
                   <>
                     <span
                       className="task-text"
-                      onClick={() => toggleTaskCompletion(index)}
+                      onClick={() => toggleTaskCompletion(item)}
                       style={{
-                        textDecoration: item.completed
+                        textDecoration: item.isCompleted
                           ? "line-through"
                           : "none",
                         cursor: "pointer",
                         flex: 1
                       }}
                     >
-                      {item.text}
+                      {item.title}
                     </span>
                     <Button
                       type="primary"
                       onClick={(e) => {
                         e.stopPropagation();
-                        editTask(index);
+                        editTask(item);
                       }}
                     >
                       <EditFilled />
@@ -143,7 +278,7 @@ export function TaskPage() {
                       type="primary"
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteTask(index);
+                        deleteTask(item);
                       }}
                     >
                       <DeleteFilled />
@@ -154,6 +289,9 @@ export function TaskPage() {
             ))}
           </ul>
         )}
+        <Button type="primary" onClick={logout}>
+          Log out
+        </Button>
       </section>
       <Modal
         title="Please inter task"

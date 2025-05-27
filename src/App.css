@@ -5,7 +5,7 @@
   text-align: center;
   background-color: rgba(0, 250, 237, 0.253);
 }
-.titel-home {
+.title-home {
   display: flex;
   flex-direction: column;
 }
