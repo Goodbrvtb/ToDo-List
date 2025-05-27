@@ -1,0 +1,1 @@
+import{k as i,l as o,B as s}from"./index-BFlqfnX8.js";function r(){const n=i(),e=t=>{n(t)};return o.jsxs("div",{children:[o.jsx("h1",{children:"404 - Not Found"}),o.jsx("p",{children:"The page you are looking for does not exist."}),o.jsx(s,{onClick:()=>e("/"),children:"HomePage"})]})}export{r as NotFound};
