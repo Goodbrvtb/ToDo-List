@@ -9,29 +9,25 @@ export const router = createBrowserRouter([
         path: "/registration",
         lazy: {
           Component: async () =>
-            (await import("./components/pages/registrationPage"))
-              .RegistrationPage
+            (await import("./pages/registrationPage")).RegistrationPage
         }
       },
       {
         path: "/login",
         lazy: {
-          Component: async () =>
-            (await import("./components/pages/loginPage")).LoginPage
+          Component: async () => (await import("./pages/loginPage")).LoginPage
         }
       },
       {
         path: "/task",
         lazy: {
-          Component: async () =>
-            (await import("./components/pages/taskPage")).TaskPage
+          Component: async () => (await import("./pages/taskPage")).TaskPage
         }
       },
       {
         path: "*",
         lazy: {
-          Component: async () =>
-            (await import("./components/pages/notFound")).NotFound
+          Component: async () => (await import("./pages/notFound")).NotFound
         }
       }
     ]

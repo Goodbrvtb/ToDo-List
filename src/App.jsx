@@ -5,13 +5,15 @@ import "./App.css";
 
 export function App() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const myToken = localStorage.getItem("myToken");
+
   useEffect(() => {
     if (myToken) {
       navigate("/task");
     }
   }, [myToken, navigate]);
-  let location = useLocation();
 
   const handleNavigation = (path) => {
     navigate(path);
