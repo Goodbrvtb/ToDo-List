@@ -76,7 +76,7 @@ export function TaskPage() {
   };
   const handleDelete = async (item) => {
     await deleteTaskId(item, myDataTask);
-    taskApi.getTasks();
+    fetchData();
   };
 
   const editTask = (item) => {
